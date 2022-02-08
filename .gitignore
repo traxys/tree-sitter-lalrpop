@@ -1,0 +1,5 @@
+*.lalrpop
+node_modules
+*.html
+example
+.cache
