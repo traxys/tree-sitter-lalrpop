@@ -35,8 +35,11 @@
 (bare_symbol
   (identifier) @function)
 
-(nonterminal
-  (nonterminal_name) @function)
+(nonterminal_name
+  (macro_id) @function)
+
+(nonterminal_name
+  (identifier) @function)
 
 (nonterminal
   (type_ref) @type)
