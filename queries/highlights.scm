@@ -26,11 +26,19 @@
 	">" @punctuation.bracket)
 
 (binding_symbol
-	name: (identifier) @variable.parameter
-	item: (bare_symbol) @type)
+	name: (identifier) @variable.parameter)
+
+(bare_symbol
+  (macro 
+    ((macro_id) @function)))
+
+(bare_symbol
+  (identifier) @function)
 
 (nonterminal
-  (nonterminal_name) @function
+  (nonterminal_name) @function)
+
+(nonterminal
   (type_ref) @type)
 
 "(" @punctuation.bracket
