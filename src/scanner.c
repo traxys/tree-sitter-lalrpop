@@ -119,7 +119,7 @@ static bool lifetime_or_char_literal(TSLexer *lexer) {
 	return true;
 }
 
-static bool strchr(const char *str, int32_t c) {
+static bool unicode_strchr(const char *str, int32_t c) {
 	while (*str != 0) {
 		if (*str == c)
 			return true;
@@ -158,14 +158,14 @@ static bool code(TSLexer *lexer, const char *open_delims,
 		case 0:
 			return balance == 0;
 		default:
-			if (strchr(open_delims, lexer->lookahead)) {
+			if (unicode_strchr(open_delims, lexer->lookahead)) {
 				balance++;
 			} else if (balance > 0) {
-				if (strchr(close_delims, lexer->lookahead))
+				if (unicode_strchr(close_delims, lexer->lookahead))
 					balance--;
 			} else {
 				if (lexer->lookahead == ',' || lexer->lookahead == ';' ||
-				    strchr(close_delims, lexer->lookahead))
+				    unicode_strchr(close_delims, lexer->lookahead))
 					return true;
 			}
 			break;
