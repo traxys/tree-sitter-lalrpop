@@ -1,28 +1,29 @@
+#include "scanner_table.h"
+#include <search.h>
+#include <stdio.h>
 #include <tree_sitter/parser.h>
 #include <wctype.h>
-#include <stdio.h>
-#include <search.h>
-#include "scanner_table.c"
 
 #define SYMBOLS(...)                                                           \
 	enum TokenType { __VA_ARGS__ };                                            \
-	enum TokenType variants[] = { __VA_ARGS__ };
+	const enum TokenType variants[] = { __VA_ARGS__ };
 
 SYMBOLS(MACRO_ID, USE, STRING_CONTENT, REGEX_LITERAL, NORMAL_ACTION,
         FAILIBLE_ACTION)
 
 #define for_each_symbol(var)                                                   \
-	for (int i = 0, var = variants[0];                                         \
+	for (int i = 0, (var) = variants[0];                                       \
 	     i < sizeof(variants) / sizeof(enum TokenType);                        \
-	     i++, var = variants[i])
+	     i++, (var) = variants[i])
 
 static bool other_variants(const bool *valid_symbols, enum TokenType variant) {
 	bool other = false;
 
-	enum TokenType iter_var;
+	enum TokenType iter_var = variants[0];
 	for_each_symbol(iter_var) {
-		if (iter_var == variant)
+		if (iter_var == variant) {
 			continue;
+		}
 
 		other |= valid_symbols[variants[i]];
 	}
@@ -31,12 +32,13 @@ static bool other_variants(const bool *valid_symbols, enum TokenType variant) {
 }
 
 static void print_valid_syms(const bool *valid_symbols) {
-	enum TokenType var;
+	enum TokenType var = variants[0];
 
 	printf("Valid variants: ");
 	for_each_symbol(var) {
-		if (valid_symbols[var])
+		if (valid_symbols[var]) {
 			printf(" %d ", var);
+		}
 	}
 
 	printf("\n");
@@ -46,18 +48,20 @@ void *tree_sitter_lalrpop_external_scanner_create() {
 	return NULL;
 }
 
-void tree_sitter_lalrpop_external_scanner_destroy(void *p) {
+void tree_sitter_lalrpop_external_scanner_destroy(void *payload) {
 }
 
-void tree_sitter_lalrpop_external_scanner_reset(void *p) {
+void tree_sitter_lalrpop_external_scanner_reset(void *payload) {
 }
 
-unsigned tree_sitter_lalrpop_external_scanner_serialize(void *p, char *buffer) {
+unsigned tree_sitter_lalrpop_external_scanner_serialize(void *payload,
+                                                        char *buffer) {
 	return 0;
 }
 
-void tree_sitter_lalrpop_external_scanner_deserialize(void *p, const char *b,
-                                                      unsigned n) {
+void tree_sitter_lalrpop_external_scanner_deserialize(void *payload,
+                                                      const char *buffer,
+                                                      unsigned length) {
 }
 
 static void advance(TSLexer *lexer) {
@@ -66,12 +70,13 @@ static void advance(TSLexer *lexer) {
 
 static bool string_literal(TSLexer *lexer, char quote) {
 	bool escape = false;
-	bool terminate;
+	bool terminate = false;
 
 	for (;;) {
 		if (lexer->lookahead == 0) {
 			return false;
-		} else if (lexer->lookahead == quote) {
+		}
+		if (lexer->lookahead == quote) {
 			advance(lexer);
 			return true;
 		}
@@ -93,7 +98,8 @@ static bool take_until_terminating(TSLexer *lexer, char terminator) {
 		if (lexer->lookahead == terminator) {
 			advance(lexer);
 			return true;
-		} else if (lexer->lookahead == 0) {
+		}
+		if (lexer->lookahead == 0) {
 			return false;
 		}
 
@@ -102,27 +108,29 @@ static bool take_until_terminating(TSLexer *lexer, char terminator) {
 }
 
 static bool lifetime_or_char_literal(TSLexer *lexer) {
-	if (lexer->lookahead == 0)
+	if (lexer->lookahead == 0) {
 		return false;
+	}
 
 	if (lexer->lookahead == '\\') {
 		advance(lexer); // Consume the backslash
 		advance(lexer); // Consume the escaped char
 		return take_until_terminating(lexer, '\'');
-	} else {
-		advance(lexer); // Consume the lookahead
-		if (lexer->lookahead == '\'')
-			advance(lexer); // it was a char literal, Consume the quote
-		return true;
 	}
+	advance(lexer); // Consume the lookahead
+	if (lexer->lookahead == '\'') {
+		advance(lexer); // it was a char literal, Consume the quote
+	}
+	return true;
 
 	return true;
 }
 
-static bool unicode_strchr(const char *str, int32_t c) {
+static bool unicode_strchr(const char *str, int32_t chr) {
 	while (*str != 0) {
-		if (*str == c)
+		if (*str == chr) {
 			return true;
+		}
 		str++;
 	}
 
@@ -137,23 +145,28 @@ static bool code(TSLexer *lexer, const char *open_delims,
 		switch (lexer->lookahead) {
 		case '"':
 			advance(lexer);
-			if (!string_literal(lexer, '"'))
+			if (!string_literal(lexer, '"')) {
 				return false;
+			}
 			continue;
 		case '\'':
 			advance(lexer);
-			if (!lifetime_or_char_literal(lexer))
+			if (!lifetime_or_char_literal(lexer)) {
 				return false;
+			}
 			continue;
 		case 'r':
 			advance(lexer);
-			if (lexer->lookahead == '#')
-				abort();
+			if (lexer->lookahead == '#') {
+				return false;
+				/* abort(); */
+			}
 			continue;
 		case '/':
 			advance(lexer);
-			if (lexer->lookahead == '/')
+			if (lexer->lookahead == '/') {
 				take_until_terminating(lexer, '\n');
+			}
 			continue;
 		case 0:
 			return balance == 0;
@@ -161,12 +174,14 @@ static bool code(TSLexer *lexer, const char *open_delims,
 			if (unicode_strchr(open_delims, lexer->lookahead)) {
 				balance++;
 			} else if (balance > 0) {
-				if (unicode_strchr(close_delims, lexer->lookahead))
+				if (unicode_strchr(close_delims, lexer->lookahead)) {
 					balance--;
+				}
 			} else {
 				if (lexer->lookahead == ',' || lexer->lookahead == ';' ||
-				    unicode_strchr(close_delims, lexer->lookahead))
+				    unicode_strchr(close_delims, lexer->lookahead)) {
 					return true;
+				}
 			}
 			break;
 		}
@@ -174,40 +189,40 @@ static bool code(TSLexer *lexer, const char *open_delims,
 	}
 }
 
-static int range_comparator(const void *key, const void *vr) {
-	const struct range *range = vr;
-	const int32_t *c = key;
+static int range_comparator(const void *key, const void *v_range) {
+	const struct range *range = v_range;
+	const int32_t *chr = key;
 
-	if (range->start > *c) {
+	if (range->start > *chr) {
 		return 1;
-	} else if (range->end < *c) {
-		return -1;
-	} else {
-		return 0;
 	}
+	if (range->end < *chr) {
+		return -1;
+	}
+	return 0;
 }
 
-static bool xid_start_extended(int32_t c) {
-	return bsearch(&c, xid_start_class,
+static bool xid_start_extended(int32_t chr) {
+	return bsearch(&chr, xid_start_class,
+	               sizeof(xid_start_class) / sizeof(struct range),
+	               sizeof(struct range), range_comparator) != NULL;
+}
+
+static bool is_xid_start(int32_t chr) {
+	return ('a' <= chr && chr <= 'z') || ('A' <= chr && chr <= 'Z') ||
+	       (chr > 0x7f && xid_start_extended(chr));
+}
+
+static bool xid_continue_extended(int32_t chr) {
+	return bsearch(&chr, xid_continue_class,
 	               sizeof(xid_continue_class) / sizeof(struct range),
 	               sizeof(struct range), range_comparator) != NULL;
 }
 
-static bool is_xid_start(int32_t c) {
-	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
-	       (c > 0x7f && xid_start_extended(c));
-}
-
-static bool xid_continue_extended(int32_t c) {
-	return bsearch(&c, xid_continue_class,
-	               sizeof(xid_continue_class) / sizeof(struct range),
-	               sizeof(struct range), range_comparator) != NULL;
-}
-
-static bool is_xid_continue(int32_t c) {
-	return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
-	       ('0' <= c && c <= '9') || c == '_' ||
-	       (c > 0x7f && xid_continue_extended(c));
+static bool is_xid_continue(int32_t chr) {
+	return ('a' <= chr && chr <= 'z') || ('A' <= chr && chr <= 'Z') ||
+	       ('0' <= chr && chr <= '9') || chr == '_' ||
+	       (chr > 0x7f && xid_continue_extended(chr));
 }
 
 static bool match_word(TSLexer *lexer, const char *word, size_t len) {
@@ -237,7 +252,6 @@ static bool regex_literal(TSLexer *lexer, size_t consumed_hash) {
 	}
 
 	if (lexer->lookahead != '"') {
-		printf("Fail regex literal on expecting \": %c\n", lexer->lookahead);
 		return false;
 	}
 
@@ -245,8 +259,9 @@ static bool regex_literal(TSLexer *lexer, size_t consumed_hash) {
 
 	size_t state = 0;
 	for (;;) {
-		if (lexer->lookahead == 0)
+		if (lexer->lookahead == 0) {
 			return false;
+		}
 
 		if (lexer->lookahead == '"') {
 			advance(lexer);
@@ -257,25 +272,28 @@ static bool regex_literal(TSLexer *lexer, size_t consumed_hash) {
 				closing_hashes++;
 			}
 
-			if (closing_hashes == hash_count)
+			if (closing_hashes == hash_count) {
 				return true;
+			}
 		} else {
 			advance(lexer);
 		}
 	}
 }
 
-bool tree_sitter_lalrpop_external_scanner_scan(void *p, TSLexer *lexer,
+bool tree_sitter_lalrpop_external_scanner_scan(void *payload, TSLexer *lexer,
                                                const bool *valid_symbols) {
-	while (iswspace(lexer->lookahead))
+	while (iswspace(lexer->lookahead)) {
 		lexer->advance(lexer, true);
+	}
 
 	if (valid_symbols[NORMAL_ACTION] && lexer->lookahead == '=') {
 		advance(lexer);
 		lexer->result_symbol = NORMAL_ACTION;
 
-		if (lexer->lookahead != '>')
+		if (lexer->lookahead != '>') {
 			goto string_content;
+		}
 
 		advance(lexer);
 
@@ -285,11 +303,13 @@ bool tree_sitter_lalrpop_external_scanner_scan(void *p, TSLexer *lexer,
 		}
 
 		// =>@R or =>@L
-		if (lexer->lookahead == '@')
+		if (lexer->lookahead == '@') {
 			goto string_content;
+		}
 
-		while (iswspace(lexer->lookahead))
+		while (iswspace(lexer->lookahead)) {
 			lexer->advance(lexer, true);
+		}
 
 		if (code(lexer, "([{", "}])")) {
 			return true;
@@ -304,33 +324,38 @@ bool tree_sitter_lalrpop_external_scanner_scan(void *p, TSLexer *lexer,
 
 			if (lexer->lookahead == '"') {
 				return regex_literal(lexer, 0);
-			} else if (lexer->lookahead == '#') {
+			}
+			if (lexer->lookahead == '#') {
 				advance(lexer);
-				if (lexer->lookahead == '#' || lexer->lookahead == '"')
+				if (lexer->lookahead == '#' || lexer->lookahead == '"') {
 					return regex_literal(lexer, 1);
+				}
 			}
 		}
 
 		lexer->result_symbol = MACRO_ID;
 
 		// If are here then we are maybe in a macro id, and it could be of the form r#...
-		if (!is_xid_start(lexer->lookahead))
+		if (!is_xid_start(lexer->lookahead)) {
 			goto string_content;
+		}
 
 		advance(lexer);
 		while (is_xid_continue(lexer->lookahead)) {
 			advance(lexer);
 		}
 
-		while (iswspace(lexer->lookahead))
+		while (iswspace(lexer->lookahead)) {
 			lexer->advance(lexer, true);
+		}
 
 		return lexer->lookahead == '<';
 	}
 
 	if (valid_symbols[USE]) {
-		if (!MATCH_WORD(lexer, "use"))
+		if (!MATCH_WORD(lexer, "use")) {
 			goto string_content;
+		}
 
 		if (code(lexer, "([{", "}])")) {
 			lexer->result_symbol = USE;
@@ -349,7 +374,8 @@ string_content:
 		for (;;) {
 			if (lexer->lookahead == '\"' || lexer->lookahead == '\\') {
 				break;
-			} else if (lexer->lookahead == 0) {
+			}
+			if (lexer->lookahead == 0) {
 				return false;
 			}
 			has_content = true;
