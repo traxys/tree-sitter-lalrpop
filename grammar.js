@@ -38,6 +38,8 @@ module.exports = grammar({
 			repeat($.grammar_item),
 		),
 
+		comment: _ => token(seq('//', /.*/)),
+
 		_use: $ => seq($.use, ";"),
 
 		grammar_type_params: $ => seq("<", commaSep($.type_parameter), ">"),
@@ -179,6 +181,7 @@ module.exports = grammar({
 
 		grammar_item: $ => choice(
 			$._use,
+			$.comment,
 			$.extern_token,
 			$.match_token,
 			$.nonterminal,

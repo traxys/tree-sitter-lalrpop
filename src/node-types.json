@@ -392,6 +392,10 @@
       "required": true,
       "types": [
         {
+          "type": "comment",
+          "named": true
+        },
+        {
           "type": "extern_token",
           "named": true
         },
@@ -1048,6 +1052,10 @@
   {
     "type": "_",
     "named": false
+  },
+  {
+    "type": "comment",
+    "named": true
   },
   {
     "type": "dyn",

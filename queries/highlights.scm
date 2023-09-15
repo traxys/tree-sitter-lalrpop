@@ -55,3 +55,6 @@
 
 (string_literal) @string
 (regex_literal) @string
+
+(comment) @comment @spell
+

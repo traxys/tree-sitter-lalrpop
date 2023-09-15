@@ -73,6 +73,22 @@
         }
       ]
     },
+    "comment": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "//"
+          },
+          {
+            "type": "PATTERN",
+            "value": ".*"
+          }
+        ]
+      }
+    },
     "_use": {
       "type": "SEQ",
       "members": [
@@ -1454,6 +1470,10 @@
         {
           "type": "SYMBOL",
           "name": "_use"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "comment"
         },
         {
           "type": "SYMBOL",
