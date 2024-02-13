@@ -30,16 +30,16 @@
 
 (bare_symbol
   (macro 
-    ((macro_id) @function)))
+    ((macro_id) @function.macro)))
 
 (bare_symbol
-  (identifier) @function)
+  (identifier) @constant)
 
 (nonterminal_name
-  (macro_id) @function)
+  (macro_id) @function.macro)
 
 (nonterminal_name
-  (identifier) @function)
+  (identifier) @constant)
 
 (nonterminal
   (type_ref) @type)
