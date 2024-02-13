@@ -58,3 +58,6 @@
 
 (comment) @comment @spell
 
+(annotation
+  (id) @function.macro)
+
