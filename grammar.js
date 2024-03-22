@@ -22,6 +22,8 @@ module.exports = grammar({
 		$.failible_action,
 	],
 
+	extras: $ => [/\s/, $.comment],
+
 	rules: {
 		source_file: $ => seq(
 			repeat($._use),
@@ -142,7 +144,7 @@ module.exports = grammar({
 			choice(
 				/[^xu]/,
 				/u[0-9a-fA-F]{4}/,
-				/u{[0-9a-fA-F]+}/,
+				/u\{[0-9a-fA-F]+\}/,
 				/x[0-9a-fA-F]{2}/
 			)
 		)),
@@ -181,7 +183,6 @@ module.exports = grammar({
 
 		grammar_item: $ => choice(
 			$._use,
-			$.comment,
 			$.extern_token,
 			$.match_token,
 			$.nonterminal,
