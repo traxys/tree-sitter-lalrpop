@@ -1016,7 +1016,7 @@
               },
               {
                 "type": "PATTERN",
-                "value": "u{[0-9a-fA-F]+}"
+                "value": "u\\{[0-9a-fA-F]+\\}"
               },
               {
                 "type": "PATTERN",
@@ -1470,10 +1470,6 @@
         {
           "type": "SYMBOL",
           "name": "_use"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "comment"
         },
         {
           "type": "SYMBOL",
@@ -2307,6 +2303,10 @@
     {
       "type": "PATTERN",
       "value": "\\s"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "comment"
     }
   ],
   "conflicts": [],
@@ -2340,4 +2340,3 @@
   "inline": [],
   "supertypes": []
 }
-
