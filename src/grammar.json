@@ -979,6 +979,10 @@
                 "name": "escape_sequence"
               },
               {
+                "type": "PATTERN",
+                "value": "\\s+"
+              },
+              {
                 "type": "SYMBOL",
                 "name": "_string_content"
               }
