@@ -135,6 +135,7 @@ module.exports = grammar({
 			alias(/b?"/, '"'),
 			repeat(choice(
 				$.escape_sequence,
+				/\s+/,
 				$._string_content
 			)),
 			token.immediate('"')
