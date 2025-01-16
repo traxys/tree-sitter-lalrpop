@@ -201,8 +201,8 @@ static int range_comparator(const void *key, const void *v_range) {
 }
 
 // Do not use bsearch from stdlib which is not exposed in wasm
-void *binsearch(const void *key, const void *base, size_t nmemb, size_t size,
-                int (*compar)(const void *, const void *)) {
+static void *binsearch(const void *key, const void *base, size_t nmemb,
+                       size_t size, int (*compar)(const void *, const void *)) {
 	size_t l, u, idx;
 	const void *p;
 	int comparison;
