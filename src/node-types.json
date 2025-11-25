@@ -331,10 +331,6 @@
           "named": true
         },
         {
-          "type": "type_parameter",
-          "named": true
-        },
-        {
           "type": "type_ref",
           "named": true
         }
@@ -719,6 +715,7 @@
   {
     "type": "source_file",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -1051,7 +1048,8 @@
   },
   {
     "type": "comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "dyn",
