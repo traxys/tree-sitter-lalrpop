@@ -157,7 +157,7 @@ module.exports = grammar({
 			optional($.forall),
 			$.path,
 			"(",
-			commaSep($.type_parameter),
+			commaSep($.type_ref),
 			")",
 			optional(seq("->", $.type_ref)),
 		),

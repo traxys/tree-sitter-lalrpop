@@ -1146,7 +1146,7 @@
               "members": [
                 {
                   "type": "SYMBOL",
-                  "name": "type_parameter"
+                  "name": "type_ref"
                 },
                 {
                   "type": "REPEAT",
@@ -1159,7 +1159,7 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "type_parameter"
+                        "name": "type_ref"
                       }
                     ]
                   }

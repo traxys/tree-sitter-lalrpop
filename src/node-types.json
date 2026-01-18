@@ -331,10 +331,6 @@
           "named": true
         },
         {
-          "type": "type_parameter",
-          "named": true
-        },
-        {
           "type": "type_ref",
           "named": true
         }
